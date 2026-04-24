@@ -1,0 +1,10 @@
+{
+  "name": "Hackathon 2-Person Project",
+  "instructions": "You are building a hackathon project with 2 developers. Person A: backend/database only. Person B: frontend/UI only. Use Superpowers for planning, GSD for execution. No file conflicts. Atomic commits.",
+  "rules": [
+    "Person A ONLY touches: server.js, database.js, docs/API.md",
+    "Person B ONLY touches: public/*, docs/ARCHITECTURE.md",
+    "Commit after every completed task",
+    "Deploy to production at minute 70, not minute 85"
+  ]
+}
