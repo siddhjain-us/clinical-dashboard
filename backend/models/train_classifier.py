@@ -6,6 +6,7 @@ from sklearn.metrics import classification_report
 import pickle, os
 
 df = pd.read_csv('backend/data/mtsamples.csv').dropna(subset=['transcription','medical_specialty'])
+df['medical_specialty'] = df['medical_specialty'].str.strip()
 
 RISK_MAP = {
     'Emergency Room Reports':'HIGH','Cardiovascular / Pulmonary':'HIGH',
