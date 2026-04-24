@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 INTERACTIONS = [
     (["warfarin"],["aspirin","ibuprofen","naproxen"],"bleeding risk: warfarin + NSAID"),
@@ -23,7 +23,7 @@ def analyze_medications(medications, labs=None):
     if len(medications) >= 8:
         interactions.append("polypharmacy risk (8+ medications)"); score += 10
 
-    cutoff = datetime.utcnow() - timedelta(hours=24)
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).replace(tzinfo=None)
     administered, missed = [], []
     for m in medications:
         t = m.get("time_administered")

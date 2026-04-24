@@ -1,23 +1,17 @@
-import pickle
+from models.note_priority import predict_note_tier
 
 HIGH_RISK = ["ckd","chronic kidney disease","heart failure","chf","copd",
              "diabetes","cirrhosis","cancer","sepsis","hiv"]
 
-def analyze_history(history, notes_text=""):
-    model_data = None
-    try:
-        with open("backend/models/priority_model.pkl","rb") as f:
-            model_data = pickle.load(f)
-    except Exception: pass
 
-    score, ml_category = 0, "UNKNOWN"
+def analyze_history(history, notes_text="", ml_result=None):
+    if ml_result is None:
+        ml_result = predict_note_tier(notes_text or "")
 
-    if model_data and notes_text.strip():
-        try:
-            v = model_data["vectorizer"].transform([notes_text])
-            ml_category = model_data["clf"].predict(v)[0]
-            score += {"HIGH":40,"MEDIUM":20,"LOW":5}.get(ml_category,10)
-        except Exception: pass
+    score = 0
+    ml_category = (ml_result.get("tier") or "UNKNOWN") if ml_result.get("model_available") else "UNKNOWN"
+    if ml_result.get("model_available") and ml_result.get("tier"):
+        score += int(ml_result.get("history_ml_bonus", 0))
 
     diagnoses = [d.lower() for d in history.get("diagnoses",[])]
     chronic   = [d for d in diagnoses if any(h in d for h in HIGH_RISK)]

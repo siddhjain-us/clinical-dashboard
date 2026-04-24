@@ -1,4 +1,8 @@
 node_modules/
+**/__pycache__/
+*.pyc
+backend/venv/
+backend/data/patients.json
 .env
 *.db
 .DS_Store

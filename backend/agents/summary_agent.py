@@ -1,8 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 WEIGHTS = {"vitals":0.35,"labs":0.25,"medications":0.20,"history":0.20}
 
-def compose_summary(results, patient):
+def compose_summary(results, patient, ml_result=None):
+    if ml_result is None:
+        from models.note_priority import predict_note_tier
+        ml_result = predict_note_tier(patient.get("notes") or "")
+
     scores = {k: results.get(k,{}).get(f"{k}_risk_score",0) for k in WEIGHTS}
     # summary_agent uses medication_risk_score key
     scores["medications"] = results.get("medications",{}).get("medication_risk_score",0)
@@ -45,11 +49,16 @@ def compose_summary(results, patient):
         "composite_score": composite,
         "severity":        severity,
         "primary_concern": primary,
+        "ml_note": {
+            "model_available": bool(ml_result.get("model_available")),
+            "tier": ml_result.get("tier"),
+            "proba": ml_result.get("proba"),
+        },
         "brief": {
             "concern":       f"{h.get('chief_complaint','See notes')}. Chronic: {', '.join(h.get('chronic_conditions',[])) or 'none'}.",
             "abnormalities": f"Labs: {abn_str}. Vitals: {vit_str}.",
             "medications":   med_str,
             "actions":       actions,
         },
-        "analyzed_at": datetime.utcnow().isoformat()+"Z",
+        "analyzed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
