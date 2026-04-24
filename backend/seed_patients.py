@@ -59,7 +59,7 @@ def load():
     time.sleep(1)
     for p in PATIENTS:
         try:
-            r = requests.post("http://localhost:5000/api/patient/add", json=p)
+            r = requests.post("http://localhost:8000/api/patient/add", json=p)
             d = r.json()
             print(f"Seeded {p['name']}: {d.get('severity')} score={d.get('composite_score')}")
         except Exception as e:

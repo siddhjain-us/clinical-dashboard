@@ -38,6 +38,12 @@ def stats():
     })
 
 if __name__ == "__main__":
-    import seed_patients
-    seed_patients.load()
-    app.run(debug=True, port=5000)
+    # threaded=True: dev server can answer /api/stats while a slow orchestrator
+    # POST is in progress (avoids "stuck" curl in another terminal)
+    app.run(
+        host="127.0.0.1",
+        port=8000,
+        debug=False,
+        threaded=True,
+        use_reloader=False,
+    )
