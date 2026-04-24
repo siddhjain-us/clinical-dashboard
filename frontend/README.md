@@ -43,3 +43,7 @@ Vite + React UI for the Flask API in `../backend/`.
 npm run build
 npm run preview
 ```
+
+## Judge / demo script
+
+See **[`../JUDGE_PITCH.md`](../JUDGE_PITCH.md)** for a 2–3 minute pitch outline and run order.

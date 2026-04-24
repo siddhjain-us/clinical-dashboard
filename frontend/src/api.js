@@ -25,3 +25,17 @@ export function fetchPatient(id) {
 export function fetchHealth() {
   return getJson("/health");
 }
+
+export async function postAnalyze(body) {
+  const r = await fetch(`${base()}/api/patient/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const msg = data.error || r.statusText || "Request failed";
+    throw new Error(msg);
+  }
+  return data;
+}

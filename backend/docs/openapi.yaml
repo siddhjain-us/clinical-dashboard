@@ -1,0 +1,78 @@
+openapi: 3.0.3
+info:
+  title: Clinical triage dashboard API
+  version: 1.0.0
+  description: |
+    Multi-agent patient analysis. JSON bodies; CORS enabled for local dev.
+    `POST /api/patient/add` requires `patient_id` and persists to `data/patients.json`.
+servers:
+  - url: http://127.0.0.1:8000
+    description: Local dev
+paths:
+  /:
+    get:
+      summary: Service info
+      responses:
+        "200":
+          description: JSON with service name and health pointer
+  /health:
+    get:
+      summary: Liveness and ML model file status
+      responses:
+        "200":
+          description: status, paths, ml_model_loaded
+  /api/patients:
+    get:
+      summary: List stored patients (after add)
+      responses:
+        "200":
+          description: Array of patient objects
+  /api/patient/{pid}:
+    get:
+      summary: Get one patient by id
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Patient object
+        "404":
+          description: not found
+  /api/stats:
+    get:
+      summary: Aggregate counts and average score
+      responses:
+        "200":
+          description: total, red_count, amber_count, green_count, avg_score
+  /api/patient/add:
+    post:
+      summary: Run orchestrator and append to store
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [patient_id]
+              properties:
+                patient_id:
+                  type: string
+      responses:
+        "200":
+          description: Enriched patient with agents and summary
+        "400":
+          description: validation error
+  /api/patient/analyze:
+    post:
+      summary: Run orchestrator only (no persist)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Analysis result, not stored

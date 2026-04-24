@@ -2,6 +2,7 @@ import { Routes, Route, NavLink, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Dashboard from "./Dashboard.jsx";
 import PatientDetail from "./PatientDetail.jsx";
+import Analyze from "./Analyze.jsx";
 import { fetchHealth } from "./api.js";
 
 function HealthPill() {
@@ -37,23 +38,62 @@ function EmptyHint() {
   );
 }
 
+const THEME_KEY = "clinical-theme";
+
+function ThemeToggle() {
+  const [dark, setDark] = useState(
+    () => localStorage.getItem(THEME_KEY) === "dark"
+  );
+  useEffect(() => {
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
+  }, [dark]);
+  return (
+    <button
+      type="button"
+      className="btn theme-btn"
+      onClick={() => setDark((d) => !d)}
+      aria-pressed={dark}
+      title="Toggle dark mode"
+    >
+      {dark ? "Light" : "Dark"} mode
+    </button>
+  );
+}
+
 export default function App() {
   return (
     <div className="app">
       <header className="app-header">
         <h1>Clinical triage dashboard</h1>
-        <HealthPill />
+        <div className="header-right">
+          <ThemeToggle />
+          <HealthPill />
+        </div>
       </header>
-      <nav style={{ marginBottom: "0.75rem" }}>
-        <NavLink to="/" end>
+      <nav className="main-nav" style={{ marginBottom: "0.75rem" }}>
+        <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : undefined)}>
           List
+        </NavLink>
+        <NavLink
+          to="/analyze"
+          end
+          className={({ isActive }) => (isActive ? "active" : undefined)}
+        >
+          Analyze
         </NavLink>
       </nav>
       <EmptyHint />
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/analyze" element={<Analyze />} />
         <Route path="/patient/:id" element={<PatientDetail />} />
       </Routes>
+      <footer className="limitations" role="note">
+        <strong>Demo / hackathon</strong> — not for clinical diagnosis. Rule-based and ML scores
+        support <em>triage awareness</em> only; use de-identified or synthetic data. Model trained on
+        public-style text, not your institution.
+      </footer>
     </div>
   );
 }

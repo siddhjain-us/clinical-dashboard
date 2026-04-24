@@ -39,7 +39,7 @@ Patient list persistence: JSON at **`data/patients.json`** (created on first add
 
 ## Frontend dashboard (Vite + React)
 
-The browser UI is in **[`../frontend/`](../frontend/)** — start the **API first**, then `cd ../frontend && npm install && npm run dev`. If the list is empty, run the **seed** command (above) and refresh. Full run order: [`../frontend/README.md`](../frontend/README.md).
+The browser UI is in **[`../frontend/`](../frontend/)** — start the **API first**, then `cd ../frontend && npm install && npm run dev`. If the list is empty, run the **seed** command (above) and refresh. Full run order: [`../frontend/README.md`](../frontend/README.md). A **2–3 minute judge pitch** outline is in [`../JUDGE_PITCH.md`](../JUDGE_PITCH.md).
 
 ## Production-style server (optional)
 
@@ -48,6 +48,10 @@ From `backend/`:
 ```bash
 gunicorn wsgi:app -b 127.0.0.1:8000 --threads 4
 ```
+
+## API contract (OpenAPI)
+
+A hand-maintained spec lives at [`docs/openapi.yaml`](docs/openapi.yaml) for the main GET/POST routes (use with Swagger UI or code generators as needed).
 
 ## API
 

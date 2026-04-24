@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchPatient } from "./api.js";
+import { useToast } from "./ToastContext.jsx";
 
 function Section({ title, children }) {
   return (
@@ -27,7 +28,37 @@ function ListOrDash({ items }) {
   );
 }
 
+function ProbaBars({ proba }) {
+  if (!proba || typeof proba !== "object") return null;
+  const entries = Object.entries(proba).sort((a, b) => b[1] - a[1]);
+  return (
+    <div className="proba-wrap" aria-label="Class probabilities">
+      {entries.map(([k, v]) => (
+        <div key={k} className="proba-row">
+          <span className="proba-name">{k}</span>
+          <div className="proba-bar-bg">
+            <div className="proba-bar-fill" style={{ width: `${Math.min(100, v * 100)}%` }} />
+          </div>
+          <span className="proba-pct">{(v * 100).toFixed(0)}%</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function downloadJson(patient, onDone) {
+  const name = (patient.patient_id || "patient") + "-export.json";
+  const blob = new Blob([JSON.stringify(patient, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  onDone?.();
+}
+
 export default function PatientDetail() {
+  const toast = useToast();
   const { id } = useParams();
   const [p, setP] = useState(null);
   const [error, setError] = useState(null);
@@ -64,9 +95,23 @@ export default function PatientDetail() {
 
   return (
     <div className="detail">
-      <Link className="back" to="/">
-        ← Back to list
-      </Link>
+      <div className="detail-actions">
+        <Link className="back" to="/">
+          ← Back to list
+        </Link>
+        <button
+          type="button"
+          className="btn primary"
+          onClick={() => downloadJson(p, () => toast("Downloaded JSON", "ok"))}
+        >
+          Download JSON
+        </button>
+      </div>
+
+      <div className="card time-strip">
+        <span className="time-label">Analyzed at</span>{" "}
+        <time dateTime={p.analyzed_at}>{p.analyzed_at || "—"}</time>
+      </div>
 
       <div className="card">
         <h2 style={{ marginTop: 0 }}>
@@ -74,26 +119,44 @@ export default function PatientDetail() {
         </h2>
         <p>
           <span className={`badge badge-${p.severity || "AMBER"}`}>{p.severity || "—"}</span>{" "}
-          &nbsp; score <strong>{p.composite_score}</strong> · {p.age}y {p.sex} · {p.analyzed_at}
+          &nbsp; score <strong>{p.composite_score}</strong> · {p.age}y {p.sex}
         </p>
         <p>
           <strong>Primary concern:</strong> {p.primary_concern}
         </p>
       </div>
 
+      <div className="card explainability">
+        <h3>Signals at a glance</h3>
+        <p>
+          <strong>Rule-based composite (0–100):</strong> {p.composite_score} (drives {p.severity}{" "}
+          band from vitals, labs, meds, history)
+        </p>
+        {ml.model_available && ml.tier != null && (
+          <p>
+            <strong>ML note risk tier:</strong> {ml.tier} (extra signal on clinical text, not
+            a diagnosis)
+          </p>
+        )}
+        {b.actions && b.actions[0] && (
+          <p className="why-line">
+            <strong>Why it matters (first action):</strong> {b.actions[0]}
+          </p>
+        )}
+      </div>
+
       <Section title="AI note risk (ml_note)">
         {ml.model_available ? (
-          <p>
-            <strong>Tier:</strong> {ml.tier ?? "—"}{" "}
-            {ml.proba && (
-              <span style={{ color: "#5c6b7a", fontSize: "0.85rem" }}>
-                (proba: {Object.entries(ml.proba)
-                  .map(([k, v]) => `${k}: ${(v * 100).toFixed(0)}%`)
-                  .join(", ")}
-                )
-              </span>
-            )}
-          </p>
+          <>
+            <p>
+              <strong>Tier:</strong> {ml.tier ?? "—"}
+            </p>
+            <ProbaBars proba={ml.proba} />
+            <p className="muted small-print">
+              Probabilities are from the trained classifier on the note; use with clinician
+              review.
+            </p>
+          </>
         ) : (
           <p style={{ color: "#5c6b7a" }}>
             No model on server — place <code>priority_model.pkl</code> under <code>backend/models/</code>{" "}
