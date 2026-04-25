@@ -122,12 +122,4 @@ Details and troubleshooting: [`backend/README.md`](backend/README.md) and [`fron
 
 ---
 
-## License and safety
 
-This repository is for **learning and demo** use. **Do not** use with real protected health information unless your environment and agreements allow it. Model behavior must be **clinically validated** before any real clinical deployment; this project does not claim that validation.
-
----
-
-**Elevator line:** *We turn messy patient data and clinical notes into a prioritized, explainable triage view—multi-signal rules plus NLP on the note—so teams can see who to see first and why.*
-
-© Project authors — see Git history for contributors.
